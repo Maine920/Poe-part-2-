@@ -1,0 +1,240 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ */
+
+package com.mycompany.chatapplication2;
+
+/**
+ *
+ * @author madon
+ */
+
+import javax.swing.JOptionPane;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
+import java.util.ArrayList;
+
+class Message{
+
+    String messageID;
+    String messageHash;
+    String recipient;
+    String content;
+
+    public Message(String id, String hash, String recipient, String content) {
+        this.messageID = id;
+        this.messageHash = hash;
+        this.recipient = recipient;
+        this.content = content;
+    }
+}  
+public class ChatApplication2 { //Main class for the Application
+
+    private static ArrayList<Message> messageList = new ArrayList<>();
+    private static int totalMessagesSent = 0;
+
+// Stores the  registration variables for validation during login
+    private static String registeredUser = "";
+    private static String registeredPass = "";
+
+    public static void main(String[] args) {
+        runRegistrationWorkflow();
+
+//  Login only if Registration is correct
+        boolean loginSuccess = runLoginWorkflow();
+
+        if (!loginSuccess) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Invalid credentials.", "System Exit", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+//  Welcome Message outputted after Successful check
+        JOptionPane.showMessageDialog(null, "Welcome to QuickChat.", "QuickChat Welcome", JOptionPane.INFORMATION_MESSAGE);
+
+        boolean running = true;
+        while (running) {
+            String menu = "Please choose one of the following features from the numeric menu:\n"
+                    + "1) Send Messages\n"
+                    + "2) Show recently sent messages\n"
+                    + "3) Quit";
+
+            String choice = JOptionPane.showInputDialog(null, menu, "Main Menu", JOptionPane.QUESTION_MESSAGE);
+
+            if (choice == null || choice.equals("3")) {
+                running = false;
+                JOptionPane.showMessageDialog(null, "Quitting application...", "Exit Status", JOptionPane.INFORMATION_MESSAGE);
+            } else if (choice.equals("1")) {
+                sendMessagesWorkflow();
+            } else if (choice.equals("2")) {
+         
+                JOptionPane.showMessageDialog(null, "Coming Soon.", "Development Status", JOptionPane.WARNING_MESSAGE);  // defaults to "Coming Soon."
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid choice. Please enter 1, 2, or 3.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+// Registration for user
+    private static void runRegistrationWorkflow() {
+        JOptionPane.showMessageDialog(null, "=== Welcome ===", "Sign Up", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, "=== Registration ===");
+
+        String firstName = JOptionPane.showInputDialog(null, "Enter first name:");
+        String lastName = JOptionPane.showInputDialog(null, "Enter last name:");
+
+        registeredUser = JOptionPane.showInputDialog(null, "Create your username:");
+        registeredPass = JOptionPane.showInputDialog(null, "Create your password:");
+
+        JOptionPane.showMessageDialog(null, "Registration complete for " + firstName + " " + lastName + "!", "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+//  Login
+    private static boolean runLoginWorkflow() {
+        JOptionPane.showMessageDialog(null, "=== Login Required ===", "Login Security", JOptionPane.WARNING_MESSAGE);
+
+        String userAttempt = JOptionPane.showInputDialog(null, "Enter your username:");
+        String passAttempt = JOptionPane.showInputDialog(null, "Enter your password:");
+
+        if (userAttempt != null && userAttempt.equals(registeredUser)
+                && passAttempt != null && passAttempt.equals(registeredPass)) {
+            JOptionPane.showMessageDialog(null, "Login Successful!", "Granted", JOptionPane.INFORMATION_MESSAGE);
+            return true;
+        }
+        return false;
+    }
+
+    private static void sendMessagesWorkflow() {
+
+        String numInput = JOptionPane.showInputDialog(null, "How many messages do you wish to enter?", "Message Loop Allocation", JOptionPane.QUESTION_MESSAGE);
+        if (numInput == null) {
+            return;
+        }
+
+        int numMessages;
+        try {
+            numMessages = Integer.parseInt(numInput);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Please enter a valid round number.", "Parsing Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+       
+        for (int i = 0; i < numMessages; i++) {
+
+       
+            String recipient = "";
+            while (true) {
+                recipient = JOptionPane.showInputDialog(null, "(Message " + (i + 1) + " of " + numMessages + ")\nEnter recipient cell number (with international code):");
+                if (recipient == null) {
+                    return;
+                }
+
+                if (recipient.trim().length() >= 10) {
+                    break;
+                }
+                JOptionPane.showMessageDialog(null, "Recipient error. Number requires an international dialing extension code.", "Format Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            String content = "";
+            while (true) {
+                content = JOptionPane.showInputDialog(null, "Enter your short message description (Max 250 characters):"); // Do not exceed max amount of characters
+                if (content == null) {
+                    return;
+                }
+
+                if (content.length() <= 250) {
+                    JOptionPane.showMessageDialog(null, "Message sent");
+                    break;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please enter a message of less than 250 characters.", "Content Length Violation", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+            Random rand = new Random();
+            long idNum = (long) (rand.nextDouble() * 9000000000L) + 1000000000L;
+            String messageID = String.valueOf(idNum);
+                   
+            String hash = generateHash(messageID, i, content);
+
+            String[] choices = {"S (Send Message)", "0 (Disregard Message)", "Store Message"}; //  Choice Menu
+            int actionChoice = JOptionPane.showOptionDialog(null,
+                    "Choose an action path for this processing segment:",
+                    "Message Routing Options",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, choices, choices[0]);
+
+            if (actionChoice == 0) { // S Selected
+                messageList.add(new Message(messageID, hash, recipient, content));
+                totalMessagesSent++;
+
+                String displayReport = "Message ID: " + messageID + "\n"
+                        + "Message Hash: " + hash + "\n"
+                        + "Recipient: " + recipient + "\n"
+                        + "Message: " + content;
+                JOptionPane.showMessageDialog(null, displayReport, "Successfully Processed Details", JOptionPane.INFORMATION_MESSAGE);
+
+            } else if (actionChoice == 1) { // 0 Selected
+                JOptionPane.showMessageDialog(null, "Press 0 to delete the message", "Status Information", JOptionPane.INFORMATION_MESSAGE);
+            } else if (actionChoice == 2) { // Store Selected
+                JOptionPane.showMessageDialog(null, "Message successfully stored", "Status Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+       
+        // Output the  Amount of Messages sent
+        JOptionPane.showMessageDialog(null, "Total messages sent: " + totalMessagesSent, "Task Summary Reports", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+ 
+        private static String generateHash(String id, int loopCounter, String content) {
+        String cleanID = id.substring(0, 2);
+
+        String[] splitWords = content.trim().split("\\s+");
+        String firstWord = splitWords[0];
+        String lastWord = splitWords[splitWords.length - 1];
+
+        String generatedRaw = cleanID + ":" + loopCounter + ":" + firstWord + lastWord;
+
+        return generatedRaw.toUpperCase(); // Returns the Hash to upper case wehn message has succesfull been sent
+    }
+private static void saveToJSONFile() {
+String jsonFilePath = "messages.json";
+StringBuilder jsonBuilder = new StringBuilder();
+
+jsonBuilder.append("[\n");
+for (int index = 0; index < messageList.size(); index++) {
+Message currentMessage = messageList.get(index);
+
+jsonBuilder.append(" {\n");
+jsonBuilder.append(" \"messageID\": \"").append(escapeString(currentMessage.messageID)).append("\",\n");
+jsonBuilder.append(" \"messageHash\": \"").append(escapeString(currentMessage.messageHash)).append("\",\n");
+jsonBuilder.append(" \"recipient\": \"").append(escapeString(currentMessage.recipient)).append("\",\n");
+jsonBuilder.append(" \"content\": \"").append(escapeString(currentMessage.content)).append("\"\n");
+
+if (index < messageList.size() - 1) {
+jsonBuilder.append(" },\n");
+} else {
+jsonBuilder.append(" }\n");
+}
+}
+jsonBuilder.append("]");
+
+try (FileWriter diskWriter = new FileWriter(jsonFilePath)) {
+diskWriter.write(jsonBuilder.toString());
+diskWriter.flush();
+System.out.println("Console Logs Notification Engine: Successfully synchronized persistence records inside messages.json target mapping coordinates.");
+} catch (IOException fileWriteException) {
+JOptionPane.showMessageDialog(null, "Persistence Error Event: Critical pipeline failure tracking disk operations write vector commands tasks.", "File Storage System Error", JOptionPane.ERROR_MESSAGE);
+fileWriteException.printStackTrace();
+}
+}
+
+private static String escapeString(String inputSourceText) {
+if (inputSourceText == null) return "";
+return inputSourceText.replace("\\", "\\\\")
+.replace("\"", "\\\"")
+.replace("\n", "\\n")
+.replace("\r", "\\r")
+.replace("\t", "\\t");
+}
+}
