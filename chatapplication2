@@ -1,193 +1,217 @@
-import javax.swing.JOptionPane;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
-class Message{
+class Message {
+String messageID;
+String messageHash;
+String recipient;
+String content;
 
-    String messageID;
-    String messageHash;
-    String recipient;
-    String content;
+public Message(String id, String hash, String recipient, String content) {
+this.messageID = id;
+this.messageHash = hash;
+this.recipient = recipient;
+this.content = content;
+}
+}
 
-    public Message(String id, String hash, String recipient, String content) {
-        this.messageID = id;
-        this.messageHash = hash;
-        this.recipient = recipient;
-        this.content = content;
-    }
-}  
-public class ChatApplication2 { 
 
-    private static ArrayList<Message> messageList = new ArrayList<>();
-    private static int totalMessagesSent = 0;
+public class ChatApplication2 {
 
-// Stores the  registration variables for validation during login
-    private static String registeredUser = "";
-    private static String registeredPass = "";
+private static final ArrayList<Message> messageList = new ArrayList<>();
+private static int totalMessagesSent = 0;
 
-    public static void main(String[] args) {
-        runRegistrationWorkflow();
+private static String registeredUser = "";
+private static String registeredPass = "";
 
-//  Login only if Registration is correct
-        boolean loginSuccess = runLoginWorkflow();
+// Single Scanner instance shared across methods
+private static final Scanner scanner = new Scanner(System.in);
 
-        if (!loginSuccess) {
-            JOptionPane.showMessageDialog(null, "Access Denied. Invalid credentials.", "System Exit", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+public static void main(String[] args) {
+// Registration
+runRegistrationWorkflow();
 
-//  Welcome Message outputted after Successful check
-        JOptionPane.showMessageDialog(null, "Welcome to QuickChat.", "QuickChat Welcome", JOptionPane.INFORMATION_MESSAGE);
+//  User  Login check
+boolean loginSuccess = runLoginWorkflow();
+if (!loginSuccess) {
+System.out.println("\n[SECURITY NOTICE] Access Denied.");
+return;
+}
 
-        boolean running = true;
-        while (running) {
-            String menu = "Please choose one of the following features from the numeric menu:\n"
-                    + "1) Send Messages\n"
-                    + "2) Show recently sent messages\n"
-                    + "3) Quit";
+System.out.println(" Welcome to QuickChat ");
 
-            String choice = JOptionPane.showInputDialog(null, menu, "Main Menu", JOptionPane.QUESTION_MESSAGE);
+boolean running = true;
+while (running) {
+System.out.println("\nPlease choose one of the following features from the numeric menu:");
+System.out.println("1) Send Messages");
+System.out.println("2) Show recently sent messages");
+System.out.println("3) Quit");
+System.out.print("Selection: ");
 
-            if (choice == null || choice.equals("3")) {
-                running = false;
-                JOptionPane.showMessageDialog(null, "Quitting application...", "Exit Status", JOptionPane.INFORMATION_MESSAGE);
-            } else if (choice.equals("1")) {
-                sendMessagesWorkflow();
-            } else if (choice.equals("2")) {
-         
-                JOptionPane.showMessageDialog(null, "Coming Soon.", "Development Status", JOptionPane.WARNING_MESSAGE);  // defaults to "Coming Soon."
-            } else {
-                JOptionPane.showMessageDialog(null, "Invalid choice. Please enter 1, 2, or 3.", "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
+String choice = scanner.nextLine().trim();
 
-// Registration for user
-    private static void runRegistrationWorkflow() {
-        JOptionPane.showMessageDialog(null, "=== Welcome ===", "Sign Up", JOptionPane.INFORMATION_MESSAGE);
-        JOptionPane.showMessageDialog(null, "=== Registration ===");
+if (choice.equals("3")) {
+running = false;
+System.out.println("\nQuitting application safely...");
+} else if (choice.equals("1")) {
+sendMessagesWorkflow();
+} else if (choice.equals("2")) {
+showRecentlySentMessages();
+} else {
+System.out.println("\n[INPUT FAULT ERROR] Invalid selection. Choose 1, 2, or 3.");
+}
+}
+}
+private static void runRegistrationWorkflow() {
+System.out.println("=== Welcome ====");
+System.out.println("=== System Sign Up ===");
 
-        String firstName = JOptionPane.showInputDialog(null, "Enter first name:");
-        String lastName = JOptionPane.showInputDialog(null, "Enter last name:");
+System.out.print("Enter First Name: ");
+String firstName = scanner.nextLine();
 
-        registeredUser = JOptionPane.showInputDialog(null, "Create your username:");
-        registeredPass = JOptionPane.showInputDialog(null, "Create your password:");
+System.out.print("Enter Last Name: ");
+String lastName = scanner.nextLine();
 
-        JOptionPane.showMessageDialog(null, "Registration complete for " + firstName + " " + lastName + "!", "Success", JOptionPane.INFORMATION_MESSAGE);
-    }
+System.out.print("Create account username: ");
+registeredUser = scanner.nextLine();
 
-//  Login
-    private static boolean runLoginWorkflow() {
-        JOptionPane.showMessageDialog(null, "=== Login Required ===", "Login Security", JOptionPane.WARNING_MESSAGE);
+System.out.print("Create account password: ");
+registeredPass = scanner.nextLine();
 
-        String userAttempt = JOptionPane.showInputDialog(null, "Enter your username:");
-        String passAttempt = JOptionPane.showInputDialog(null, "Enter your password:");
+System.out.println("[REGISTRATION SUCCESS] Welcome " + firstName + " " + lastName + "!");
+}
 
-        if (userAttempt != null && userAttempt.equals(registeredUser)
-                && passAttempt != null && passAttempt.equals(registeredPass)) {
-            JOptionPane.showMessageDialog(null, "Login Successful!", "Granted", JOptionPane.INFORMATION_MESSAGE);
-            return true;
-        }
-        return false;
-    }
+private static boolean runLoginWorkflow() {
+System.out.println("=== Account Authorization ===");
 
-    private static void sendMessagesWorkflow() {
+System.out.print("Enter username: ");
+String userAttempt = scanner.nextLine();
 
-        String numInput = JOptionPane.showInputDialog(null, "How many messages do you wish to enter?", "Message Loop Allocation", JOptionPane.QUESTION_MESSAGE);
-        if (numInput == null) {
-            return;
-        }
+System.out.print("Enter password: ");
+String passAttempt = scanner.nextLine();
 
-        int numMessages;
-        try {
-            numMessages = Integer.parseInt(numInput);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Please enter a valid round number.", "Parsing Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-       
-        for (int i = 0; i < numMessages; i++) {
+return userAttempt.equals(registeredUser) && passAttempt.equals(registeredPass);
+}
 
-       
-            String recipient = "";
-            while (true) {
-                recipient = JOptionPane.showInputDialog(null, "(Message " + (i + 1) + " of " + numMessages + ")\nEnter recipient cell number (with international code):");
-                if (recipient == null) {
-                    return;
-                }
+private static void sendMessagesWorkflow() {
+System.out.print("\nHow many total messages do you wish to enter? ");
+String numInput = scanner.nextLine();
 
-                if (recipient.trim().length() >= 10) {
-                    break;
-                }
-                JOptionPane.showMessageDialog(null, "Recipient error. Number requires an international dialing extension code.", "Format Error", JOptionPane.ERROR_MESSAGE);
-            }
+int numMessages;
+try {
+numMessages = Integer.parseInt(numInput.trim());
+} catch (NumberFormatException e) {
+System.out.println("\n[PARSING VALUE ERROR] Invalid integer parameter entered. Aborting pipeline.");
+return;
+}
 
-            String content = "";
-            while (true) {
-                content = JOptionPane.showInputDialog(null, "Enter your short message description (Max 250 characters):"); // Do not exceed max amount of characters
-                if (content == null) {
-                    return;
-                }
+for (int i = 0; i < numMessages; i++) {
+System.out.println(String.format("\n--- Message Loop %d of %d ---", (i + 1), numMessages));
 
-                if (content.length() <= 250) {
-                    JOptionPane.showMessageDialog(null, "Message sent");
-                    break;
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please enter a message of less than 250 characters.", "Content Length Violation", JOptionPane.ERROR_MESSAGE);
-                }
-            }
+// 1. Recipient Validation (Minimum 10 characters)
+String recipient = "";
+while (true) {
+System.out.print("Enter recipient mobile number ( international dialing codes): ");
+recipient = scanner.nextLine();
 
-            Random rand = new Random();
-            long idNum = (long) (rand.nextDouble() * 9000000000L) + 1000000000L;
-            String messageID = String.valueOf(idNum);
-                   
-            String hash = generateHash(messageID, i, content);
+if (recipient.trim().length() >= 10) {
+break;
+}
+System.out.println("[FORMAT DATA FAULT] Format verification failure. Full international digits required.");
+}
 
-            String[] choices = {"S (Send Message)", "0 (Disregard Message)", "Store Message"}; //  Choice Menu
-            int actionChoice = JOptionPane.showOptionDialog(null,
-                    "Choose an action path for this processing segment:",
-                    "Message Routing Options",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null, choices, choices[0]);
 
-            if (actionChoice == 0) { // S Selected
-                messageList.add(new Message(messageID, hash, recipient, content));
-                totalMessagesSent++;
+String content = "";
+while (true) {
+System.out.print("Enter short descriptive message (Strict 250 character cap limit): ");
+content = scanner.nextLine();
 
-                String displayReport = "Message ID: " + messageID + "\n"
-                        + "Message Hash: " + hash + "\n"
-                        + "Recipient: " + recipient + "\n"
-                        + "Message: " + content;
-                JOptionPane.showMessageDialog(null, displayReport, "Successfully Processed Details", JOptionPane.INFORMATION_MESSAGE);
+if (content.trim().isEmpty()) {
+System.out.println("[VALIDATION ERROR] Message text cannot be empty.");
+} else if (content.length() <= 250) {
+System.out.println("Message text verified.");
+break;
+} else {
+System.out.println("[TEXT FIELD SIZE VIOLATION] Please enter a message of less than 250 characters.");
+}
+}
 
-            } else if (actionChoice == 1) { // 0 Selected
-                JOptionPane.showMessageDialog(null, "Press 0 to delete the message", "Status Information", JOptionPane.INFORMATION_MESSAGE);
-            } else if (actionChoice == 2) { // Store Selected
-                JOptionPane.showMessageDialog(null, "Message successfully stored", "Status Information", JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-       
-        // Output the  Amount of Messages sent
-        JOptionPane.showMessageDialog(null, "Total messages sent: " + totalMessagesSent, "Task Summary Reports", JOptionPane.INFORMATION_MESSAGE);
-    }
+//  10-Digit Message ID Token
+Random rand = new Random();
+long idNum = (long) (rand.nextDouble() * 9000000000L) + 1000000000L;
+String messageID = String.valueOf(idNum);
 
- 
-        private static String generateHash(String id, int loopCounter, String content) {
-        String cleanID = id.substring(0, 2);
+//  Token Hash
+String hash = generateHash(messageID, i, content);
 
-        String[] splitWords = content.trim().split("\\s+");
-        String firstWord = splitWords[0];
-        String lastWord = splitWords[splitWords.length - 1];
+// 5. Select Processing Vector Options Direction
+int actionChoice = -1;
+while (actionChoice < 0 || actionChoice > 2) {
+System.out.println("\nDefine routing track code selection handling for this processing instance:");
+System.out.println("0) S (Send Message)");
+System.out.println("1) 0 (Disregard Message)");
+System.out.println("2) Store Message");
+System.out.print("Selection (0-2): ");
 
-        String generatedRaw = cleanID + ":" + loopCounter + ":" + firstWord + lastWord;
+try {
+actionChoice = Integer.parseInt(scanner.nextLine().trim());
+} catch (NumberFormatException e) {
+actionChoice = -1;
+}
 
-        return generatedRaw.toUpperCase(); // Returns the Hash to upper case wehn message has succesfull been sent
-    }
-private static void saveToJSONFile() {
+if (actionChoice < 0 || actionChoice > 2) {
+System.out.println("Invalid selection. Please enter 0, 1, or 2.");
+}
+}
+
+if (actionChoice == 0) {
+// Send Message
+Message messageInstance = new Message(messageID, hash, recipient, content);
+messageList.add(messageInstance);
+totalMessagesSent++;
+
+System.out.println("\n--- Processing Session Sent Details Confirmation Report Sequence ---");
+System.out.println("Message ID: " + messageID);
+System.out.println("Message Hash: " + hash);
+System.out.println("Recipient: " + recipient);
+System.out.println("Message: " + content);
+System.out.println("---------------------------------------------------------------------");
+
+saveCurrentCollectionToJSONFile();
+
+} else if (actionChoice == 1) {
+// Disregard Message
+System.out.println("\n[DISCARDING QUEUE ROUTING VIEW] Message discarded safely.");
+} else if (actionChoice == 2) {
+// Store Message
+Message messageInstance = new Message(messageID, hash, recipient, content);
+messageList.add(messageInstance);
+System.out.println("\n[BUFFER MEMORY SYNCH CONFIRMATION] Message successfully stored in buffer memory.");
+
+saveCurrentCollectionToJSONFile();
+}
+}
+
+System.out.println("\n=== TASK SUMMARY REPORT ===");
+System.out.println("Total messages processed/sent: " + totalMessagesSent);
+}
+
+private static String generateHash(String id, int loopCounter, String content) {
+String cleanID = id.substring(0, 2);
+String[] splitWords = content.trim().split("\\s+");
+
+String firstWord = splitWords.length > 0 ? splitWords[0] : "NULL";
+String lastWord = splitWords.length > 0 ? splitWords[splitWords.length - 1] : "NULL";
+
+String generatedRaw = cleanID + ":" + loopCounter + ":" + firstWord + lastWord;
+return generatedRaw.toUpperCase();
+}
+
+private static void saveCurrentCollectionToJSONFile() {
 String jsonFilePath = "messages.json";
 StringBuilder jsonBuilder = new StringBuilder();
 
@@ -212,10 +236,24 @@ jsonBuilder.append("]");
 try (FileWriter diskWriter = new FileWriter(jsonFilePath)) {
 diskWriter.write(jsonBuilder.toString());
 diskWriter.flush();
-System.out.println("Console Logs Notification Engine: Successfully synchronized persistence records inside messages.json target mapping coordinates.");
+System.out.println("Console Logs: Successfully synchronized records inside messages.json.");
 } catch (IOException fileWriteException) {
-JOptionPane.showMessageDialog(null, "Persistence Error Event: Critical pipeline failure tracking disk operations write vector commands tasks.", "File Storage System Error", JOptionPane.ERROR_MESSAGE);
+System.out.println("\n[FILE STORAGE SYSTEM ERROR] Critical persistence pipeline error handling standard file systems operations.");
 fileWriteException.printStackTrace();
+}
+}
+
+private static void showRecentlySentMessages() {
+if (messageList.isEmpty()) {
+System.out.println("\n[BUFFER STATUS EMPTY] No messages are currently stored inside system buffers.");
+return;
+}
+
+System.out.println("\n=== Recently Handled Messages Log ===");
+for (int idx = 0; idx < messageList.size(); idx++) {
+Message msg = messageList.get(idx);
+System.out.printf("[%d] ID: %s%n Hash: %s%n To: %s%n Text: %s%n%n",
+(idx + 1), msg.messageID, msg.messageHash, msg.recipient, msg.content);
 }
 }
 
